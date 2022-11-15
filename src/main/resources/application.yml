@@ -1,1 +1,21 @@
+spring:
+  profiles:
+    default: local
 
+---
+spring:
+  config:
+    activate:
+      on-profile: local, test
+  r2dbc:
+    url: r2dbc:h2:mem:///test_db
+    username: sa
+    password:
+  flyway:
+    url: jdbc:h2:mem:test_db;DB_CLOSE_DELAY=-1;
+    user: sa
+    password:
+    baseline-on-migrate: true
+logging:
+  level:
+    org.springframework.r2dbc: DEBUG

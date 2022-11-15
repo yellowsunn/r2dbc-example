@@ -5,6 +5,8 @@ plugins {
     id("io.spring.dependency-management") version "1.0.15.RELEASE"
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.spring") version "1.6.21"
+    kotlin("plugin.noarg") version "1.6.21"
+    kotlin("kapt") version "1.7.21"
 }
 
 group = "com.yellowsunn"
@@ -24,9 +26,15 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.flywaydb:flyway-core")
+
+    implementation("javax.persistence:javax.persistence-api")
+    kapt("org.hibernate:hibernate-jpamodelgen")
+    kapt("org.springframework.boot:spring-boot-configuration-processor")
+
     runtimeOnly("com.h2database:h2")
     runtimeOnly("io.r2dbc:r2dbc-h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
     testImplementation("io.projectreactor:reactor-test")
 }
 
@@ -39,4 +47,8 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+noArg {
+    annotation("javax.persistence.Entity")
 }

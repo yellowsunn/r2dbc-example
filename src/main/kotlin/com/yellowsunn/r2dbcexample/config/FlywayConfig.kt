@@ -8,7 +8,7 @@ import org.springframework.core.env.Environment
 
 @Profile("local | test")
 @Configuration
-class FlywayConfiguration(
+class FlywayConfig(
     private val env: Environment,
 ) {
     @Bean(initMethod = "migrate")

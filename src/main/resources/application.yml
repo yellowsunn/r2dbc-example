@@ -19,3 +19,5 @@ spring:
 logging:
   level:
     org.springframework.r2dbc: DEBUG
+    org.jooq.Constants: WARN
+#    io.r2dbc.h2.client.SessionClient: DEBUG

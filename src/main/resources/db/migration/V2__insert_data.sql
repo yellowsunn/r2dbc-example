@@ -1,23 +1,3 @@
-drop table if exists users;
-drop table if exists todo;
-
-create table users
-(
-    id         bigint auto_increment,
-    first_name varchar(255),
-    last_name  varchar(255),
-    primary key (id)
-);
-
-create table todo
-(
-    id      bigint auto_increment,
-    user_id bigint,
-    title   varchar(255),
-    body    varchar(255),
-    primary key (id)
-);
-
 insert into users(first_name, last_name)
 VALUES ('hello', 'world');
 

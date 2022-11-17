@@ -8,6 +8,8 @@ import com.yellowsunn.r2dbcexample.repository.user.UserCoroutineRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,6 +22,7 @@ class TodoCoroutineServiceImpl(
     private val userCoroutineRepository: UserCoroutineRepository,
     private val todoCoroutineRepository: TodoCoroutineRepository,
 ) : TodoCoroutineService {
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional(readOnly = true)
     override suspend fun getTodosByUserId(userId: Long): TodosDto? = coroutineScope {
@@ -31,19 +34,17 @@ class TodoCoroutineServiceImpl(
             todoCoroutineRepository.findByUserId(userId)
         }
 
-        val user: User? = deferredUser.await()
-        if (user != null) {
-            val todos = deferredTodo.await()
-                .map { todo -> TodosDto.Todo(todo.id, todo.title, todo.body) }
-                .toList()
+        deferredUser.await()
+            ?.let { user ->
+                val todosDto = deferredTodo.await()
+                    .map { todo -> TodosDto.Todo(todo.id, todo.title, todo.body) }
+                    .toList()
 
-            TodosDto(
-                userId = user.id,
-                name = "${user.firstName} ${user.lastName}",
-                todos = todos
-            )
-        } else {
-            null
-        }
+                TodosDto(
+                    userId = user.id,
+                    name = "${user.firstName} ${user.lastName}",
+                    todos = todosDto
+                )
+            }
     }
 }

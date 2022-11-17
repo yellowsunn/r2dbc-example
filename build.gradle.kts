@@ -1,12 +1,16 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import nu.studer.gradle.jooq.JooqEdition
+import org.jooq.meta.jaxb.Logging
+import org.jooq.meta.jaxb.Property
+
+val jooqVersion = "3.16.11"
 
 plugins {
     id("org.springframework.boot") version "2.7.5"
     id("io.spring.dependency-management") version "1.0.15.RELEASE"
+    id("nu.studer.jooq") version "7.0"
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.spring") version "1.6.21"
-    kotlin("plugin.noarg") version "1.6.21"
-    kotlin("kapt") version "1.7.21"
 }
 
 group = "com.yellowsunn"
@@ -27,12 +31,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.flywaydb:flyway-core")
 
-    implementation("javax.persistence:javax.persistence-api")
-    kapt("org.hibernate:hibernate-jpamodelgen")
-    kapt("org.springframework.boot:spring-boot-configuration-processor")
-
+    // jooq
     implementation("org.springframework.boot:spring-boot-starter-jooq")
-    implementation("org.jooq:jooq:3.16.4")
+    implementation("org.jooq:jooq:${jooqVersion}")
+    jooqGenerator("org.jooq:jooq-meta-extensions:${jooqVersion}")
+    jooqGenerator("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("io.r2dbc:r2dbc-h2")
@@ -52,6 +55,40 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-noArg {
-    annotation("javax.persistence.Entity")
+jooq {
+    version.set(jooqVersion)
+    edition.set(JooqEdition.OSS)
+
+    configurations {
+        create("main") {
+            jooqConfiguration.apply {
+                logging = Logging.WARN
+                generator.apply {
+                    database.apply {
+                        name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+                        properties = listOf(
+                            Property().apply {
+                                key = "sort"
+                                value = "semantic"
+                            },
+                            Property().apply {
+                                key = "scripts"
+                                value = "src/main/resources/db/migration/*"
+                            },
+                        )
+                    }
+                    generate.apply {
+                        isDeprecated = false
+                        isRecords = true
+                        isImmutablePojos = true
+                        isFluentSetters = true
+                    }
+                    target.apply {
+                        packageName = "com.yellowsunn.r2dbcexample"
+                        directory = "build/generated/"
+                    }
+                }
+            }
+        }
+    }
 }
